@@ -11,8 +11,12 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def load(paths):
+    import glob
     rows = []
-    for p in paths:
+    expanded = []
+    for p in paths:  # expand globs ourselves; Windows shells pass them literally
+        expanded += sorted(glob.glob(p)) or [p]
+    for p in expanded:
         rows += [json.loads(l) for l in Path(p).read_text().splitlines() if l.strip()]
     return rows
 
