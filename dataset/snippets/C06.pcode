@@ -1,0 +1,17 @@
+Function IScript_DownloadReport()
+   Local string &nyName, &nyLine;
+   Local File &nyFile;
+   Local array of string &nyAllowed = CreateArrayRept("", 0);
+   &nyAllowed.Push("ap_aging.csv");
+   &nyAllowed.Push("po_open.csv");
+   &nyName = %Request.GetParameter("FILE");
+   If &nyAllowed.Find(&nyName) = 0 Then
+      %Response.SetStatusCode(404);
+      Return;
+   End-If;
+   &nyFile = GetFile("/psoft/reports/" | &nyName, "R", %FilePath_Absolute);
+   While &nyFile.ReadLine(&nyLine)
+      %Response.WriteLine(&nyLine);
+   End-While;
+   &nyFile.Close();
+End-Function;

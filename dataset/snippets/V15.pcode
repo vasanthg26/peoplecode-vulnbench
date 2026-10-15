@@ -1,0 +1,10 @@
+Function IScript_InvoiceList()
+   Local string &nyBu, &nySort, &nyInv;
+   Local SQL &nySql;
+   &nyBu = %Request.GetParameter("BU");
+   &nySort = %Request.GetParameter("SORT");
+   &nySql = CreateSQL("SELECT INVOICE_ID FROM PS_VOUCHER WHERE BUSINESS_UNIT = :1" | " ORDER BY " | &nySort, &nyBu);
+   While &nySql.Fetch(&nyInv)
+      %Response.WriteLine(&nyInv);
+   End-While;
+End-Function;

@@ -1,0 +1,8 @@
+Local Message &nyReq, &nyResp;
+Local boolean &nyOk;
+&nyReq = CreateMessage(Operation.IB_GENERIC_SYNC);
+&nyOk = &nyReq.IBInfo.LoadConnectorProp("HTTPTARGET");
+&nyOk = &nyReq.IBInfo.IBConnectorInfo.AddConnectorProperties("URL", "https://bank-gw.example.org/pay", %HttpProperty);
+&nyOk = &nyReq.IBInfo.IBConnectorInfo.AddConnectorProperties("Username", "sfs_batch", %Header);
+&nyOk = &nyReq.IBInfo.IBConnectorInfo.AddConnectorProperties("Password", "Sfs@Pay2024!", %Header);
+&nyResp = %IntBroker.ConnectorRequest(&nyReq);

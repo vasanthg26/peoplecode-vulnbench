@@ -1,0 +1,7 @@
+Local string &nyRecipient, &nyCmd;
+Local number &nyRc;
+&nyRecipient = NY_EXPORT_WRK.EMAILID.Value;
+&nyRc = Exec("/usr/bin/gpg --batch --encrypt -r " | &nyRecipient | " /psoft/out/payments.csv", %Exec_Synchronous + %FilePath_Absolute);
+If &nyRc <> 0 Then
+   Error "Encryption failed";
+End-If;

@@ -1,0 +1,6 @@
+Local string &nyTin, &nyOther;
+&nyTin = VENDOR_ID_NBRS.STD_ID_NUM.Value;
+SQLExec("SELECT NAME1 FROM PS_VENDOR V, PS_VENDOR_ID_NBRS N WHERE V.VENDOR_ID = N.VENDOR_ID AND N.STD_ID_NUM = :1", &nyTin, &nyOther);
+If All(&nyOther) Then
+   MessageBox(0, "", 0, 0, "Duplicate TIN " | &nyTin | " already belongs to vendor " | &nyOther);
+End-If;

@@ -1,0 +1,5 @@
+Local string &nyPin, &nyHash;
+&nyPin = NY_PIN_WRK.APPROVAL_PIN.Value;
+&nyHash = Hash(&nyPin);
+NY_APPR_PIN.PIN_HASH.Value = &nyHash;
+NY_APPR_PIN.OPRID.Value = %OperatorId;

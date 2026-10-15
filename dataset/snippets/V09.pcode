@@ -1,0 +1,7 @@
+/* NY_APPROVE_PB.FieldChange */
+Local string &nyVchr;
+&nyVchr = VOUCHER.VOUCHER_ID.Value;
+VOUCHER.APPROVAL_STATUS.Value = "A";
+VOUCHER.APPR_OPRID.Value = %OperatorId;
+VOUCHER.APPROVAL_DT.Value = %Date;
+WinMessage("Voucher " | &nyVchr | " approved.", 0);

@@ -1,0 +1,6 @@
+Function IScript_VendorBank()
+   Local string &nyVendor, &nyAcct, &nyRouting;
+   &nyVendor = %Request.GetParameter("VENDOR_ID");
+   SQLExec("SELECT BANK_ACCOUNT_NUM, BANK_ID_NBR FROM PS_VNDR_BANK_ACCT WHERE VENDOR_ID = :1", &nyVendor, &nyAcct, &nyRouting);
+   %Response.Write("{""acct"":""" | &nyAcct | """,""routing"":""" | &nyRouting | """}");
+End-Function;

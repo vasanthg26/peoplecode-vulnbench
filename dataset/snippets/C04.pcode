@@ -1,0 +1,6 @@
+Local object &nyCry;
+&nyCry = CreateObject("Crypt");
+&nyCry.Open("NY_AES256_GCM");
+&nyCry.UpdateData(NY_CARD_WRK.CARD_NBR.Value);
+NY_CARD_TBL.CARD_ENC.Value = &nyCry.Result;
+NY_CARD_TBL.CARD_LAST4.Value = Right(NY_CARD_WRK.CARD_NBR.Value, 4);

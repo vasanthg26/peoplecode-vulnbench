@@ -1,0 +1,18 @@
+method OnNotify
+   /+ &_MSG as Message +/
+   Local XmlDoc &nyDoc = &_MSG.GetXmlDoc();
+   Local string &nyAmt = &nyDoc.DocumentElement.FindNode("AMOUNT").NodeValue;
+   Local string &nyPayee = &nyDoc.DocumentElement.FindNode("PAYEE_ID").NodeValue;
+   Local string &nyExists;
+   If Not IsNumber(&nyAmt) Or Value(&nyAmt) <= 0 Or Value(&nyAmt) > 250000 Then
+      throw CreateException(26000, 10, "Invalid amount");
+   End-If;
+   SQLExec("SELECT 'Y' FROM PS_NY_PAYEE WHERE PAYEE_ID = :1 AND EFF_STATUS = 'A'", &nyPayee, &nyExists);
+   If &nyExists <> "Y" Then
+      throw CreateException(26000, 11, "Unknown payee");
+   End-If;
+   Local Record &nyRec = CreateRecord(Record.NY_PAY_STG);
+   &nyRec.PAYEE_ID.Value = &nyPayee;
+   &nyRec.AMOUNT.Value = Value(&nyAmt);
+   &nyRec.Insert();
+end-method;

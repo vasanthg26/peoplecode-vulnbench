@@ -1,0 +1,6 @@
+Local object &nyCry;
+&nyCry = CreateObject("Crypt");
+/* encrypt full PAN before storing */
+&nyCry.Open("NY_3DES_ECB");
+&nyCry.UpdateData(NY_CARD_WRK.CARD_NBR.Value);
+NY_CARD_TBL.CARD_ENC.Value = &nyCry.Result;

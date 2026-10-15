@@ -1,0 +1,10 @@
+Function IScript_DownloadReport()
+   Local string &nyName, &nyLine;
+   Local File &nyFile;
+   &nyName = %Request.GetParameter("FILE");
+   &nyFile = GetFile("/psoft/reports/" | &nyName, "R", %FilePath_Absolute);
+   While &nyFile.ReadLine(&nyLine)
+      %Response.WriteLine(&nyLine);
+   End-While;
+   &nyFile.Close();
+End-Function;

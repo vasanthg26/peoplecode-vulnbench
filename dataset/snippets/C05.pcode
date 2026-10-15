@@ -1,0 +1,6 @@
+Local string &nyCard;
+&nyCard = NY_CARD_WRK.CARD_NBR.Value;
+If Len(&nyCard) <> 16 Then
+   WriteToLog(%ApplicationLogFence_Error, "Card validation failed for ****" | Right(&nyCard, 4) | " user " | %OperatorId);
+   Error MsgGet(26000, 1, "Invalid card number.");
+End-If;

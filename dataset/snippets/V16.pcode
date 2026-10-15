@@ -1,0 +1,10 @@
+Function IScript_PurgeStaging()
+   Local string &nyOprid;
+   &nyOprid = %Request.GetParameter("OPRID");
+   If &nyOprid = "PSADMIN" Then
+      SQLExec("DELETE FROM PS_NY_PAY_STG");
+      %Response.Write("purged");
+   Else
+      %Response.Write("not authorized");
+   End-If;
+End-Function;

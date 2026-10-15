@@ -1,0 +1,10 @@
+Function IScript_VendorBank()
+   Local string &nyVendor, &nyAcct, &nyOwner;
+   If Not IsUserInRole("NY_AP_BANK_VIEW") Then
+      %Response.SetStatusCode(403);
+      Return;
+   End-If;
+   &nyVendor = %Request.GetParameter("VENDOR_ID");
+   SQLExec("SELECT B.BANK_ACCOUNT_NUM FROM PS_VNDR_BANK_ACCT B, PS_NY_VNDR_SEC S WHERE B.VENDOR_ID = S.VENDOR_ID AND S.OPRID = :1 AND B.VENDOR_ID = :2", %OperatorId, &nyVendor, &nyAcct);
+   %Response.Write("****" | Right(&nyAcct, 4));
+End-Function;

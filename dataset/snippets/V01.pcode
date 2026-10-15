@@ -1,0 +1,6 @@
+Function IScript_VendorName()
+   Local string &nyVendorId, &nyName;
+   &nyVendorId = %Request.GetParameter("VENDOR_ID");
+   SQLExec("SELECT NAME1 FROM PS_VENDOR WHERE SETID = 'SHARE' AND VENDOR_ID = '" | &nyVendorId | "'", &nyName);
+   %Response.Write(&nyName);
+End-Function;

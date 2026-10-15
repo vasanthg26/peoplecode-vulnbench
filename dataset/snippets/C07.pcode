@@ -1,0 +1,7 @@
+Local SQL &nySql;
+Local string &nyBu, &nyPo;
+&nyBu = PO_HDR.BUSINESS_UNIT.Value;
+&nySql = CreateSQL("SELECT PO_ID FROM %Table(PO_HDR) WHERE BUSINESS_UNIT = :1 AND PO_STATUS = :2 AND %DateIn(:3) <= PO_DT", &nyBu, "D", %Date);
+While &nySql.Fetch(&nyPo)
+   NY_PO_WRK.PO_ID.Value = &nyPo;
+End-While;

@@ -1,0 +1,6 @@
+Local string &nyTable, &nyCount;
+&nyTable = "PS_NY_PAY_STG";
+SQLExec("SELECT COUNT(*) FROM " | &nyTable | " WHERE PROCESS_FLAG = :1", "N", &nyCount);
+If Value(&nyCount) > 0 Then
+   WinMessage(&nyCount | " rows awaiting processing.", 0);
+End-If;

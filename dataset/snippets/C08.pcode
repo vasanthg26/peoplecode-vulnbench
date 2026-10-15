@@ -1,0 +1,10 @@
+/* NY_APPROVE_PB.FieldChange */
+If Not IsUserInRole("NY_AP_APPROVER") Then
+   Error MsgGet(26000, 20, "You are not authorized to approve vouchers.");
+End-If;
+If VOUCHER.OPRID_ENTERED_BY.Value = %OperatorId Then
+   Error MsgGet(26000, 21, "You cannot approve a voucher you entered.");
+End-If;
+VOUCHER.APPROVAL_STATUS.Value = "A";
+VOUCHER.APPR_OPRID.Value = %OperatorId;
+VOUCHER.APPROVAL_DT.Value = %Date;

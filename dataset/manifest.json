@@ -1,0 +1,222 @@
+{
+  "categories": [
+    "sql_injection",
+    "hardcoded_secret",
+    "weak_crypto",
+    "missing_authorization",
+    "untrusted_input",
+    "sensitive_data_exposure",
+    "path_traversal",
+    "command_injection"
+  ],
+  "snippets": [
+    {
+      "id": "V01",
+      "vulnerable": true,
+      "category": "sql_injection",
+      "flaw": "SQLExec(\"SELECT NAME1",
+      "note": "iScript concatenates a request parameter into SQL",
+      "file": "snippets/V01.pcode"
+    },
+    {
+      "id": "V02",
+      "vulnerable": true,
+      "category": "sql_injection",
+      "flaw": "CreateSQL(\"SELECT VOUCHER_ID",
+      "note": "page search field concatenated into CreateSQL",
+      "file": "snippets/V02.pcode"
+    },
+    {
+      "id": "V03",
+      "vulnerable": true,
+      "category": "sql_injection",
+      "flaw": "&nyRs.Fill(\"WHERE BUSINESS_UNIT",
+      "note": "IB message field used to build a Rowset.Fill WHERE clause",
+      "file": "snippets/V03.pcode"
+    },
+    {
+      "id": "V04",
+      "vulnerable": true,
+      "category": "hardcoded_secret",
+      "flaw": "AddConnectorProperties(\"Password\"",
+      "note": "literal password in IB connector properties",
+      "file": "snippets/V04.pcode"
+    },
+    {
+      "id": "V05",
+      "vulnerable": true,
+      "category": "hardcoded_secret",
+      "flaw": "&nyKey = \"",
+      "note": "symmetric key embedded as a string literal",
+      "file": "snippets/V05.pcode"
+    },
+    {
+      "id": "V06",
+      "vulnerable": true,
+      "category": "weak_crypto",
+      "flaw": "&nyCry.Open(\"NY_3DES_ECB\")",
+      "note": "card numbers encrypted with 3DES in ECB mode",
+      "file": "snippets/V06.pcode"
+    },
+    {
+      "id": "V07",
+      "vulnerable": true,
+      "category": "weak_crypto",
+      "flaw": "&nyHash = Hash(",
+      "note": "unsalted SHA-1 (Hash) used to store an approval PIN",
+      "file": "snippets/V07.pcode"
+    },
+    {
+      "id": "V08",
+      "vulnerable": true,
+      "category": "missing_authorization",
+      "flaw": "SQLExec(\"SELECT BANK_ACCOUNT_NUM",
+      "note": "iScript returns bank details for any vendor with no role or row-level check",
+      "file": "snippets/V08.pcode"
+    },
+    {
+      "id": "V09",
+      "vulnerable": true,
+      "category": "missing_authorization",
+      "flaw": "VOUCHER.APPROVAL_STATUS.Value = \"A\"",
+      "note": "FieldChange approves a voucher without any approver role check",
+      "file": "snippets/V09.pcode"
+    },
+    {
+      "id": "V10",
+      "vulnerable": true,
+      "category": "untrusted_input",
+      "flaw": "&nyRec.AMOUNT.Value = Value(",
+      "note": "IB handler posts a payment amount from the message without validation",
+      "file": "snippets/V10.pcode"
+    },
+    {
+      "id": "V11",
+      "vulnerable": true,
+      "category": "sensitive_data_exposure",
+      "flaw": "WriteToLog(%ApplicationLogFence_Error, \"Card",
+      "note": "full card number written to the application log",
+      "file": "snippets/V11.pcode"
+    },
+    {
+      "id": "V12",
+      "vulnerable": true,
+      "category": "sensitive_data_exposure",
+      "flaw": "MessageBox(0, \"\", 0, 0, \"Duplicate TIN",
+      "note": "error message reveals another vendor's TIN and name",
+      "file": "snippets/V12.pcode"
+    },
+    {
+      "id": "V13",
+      "vulnerable": true,
+      "category": "path_traversal",
+      "flaw": "&nyFile = GetFile(",
+      "note": "request parameter used as an absolute file path",
+      "file": "snippets/V13.pcode"
+    },
+    {
+      "id": "V14",
+      "vulnerable": true,
+      "category": "command_injection",
+      "flaw": "Exec(\"/usr/bin/gpg",
+      "note": "user-entered recipient concatenated into an OS command",
+      "file": "snippets/V14.pcode"
+    },
+    {
+      "id": "V15",
+      "vulnerable": true,
+      "category": "sql_injection",
+      "flaw": "\" ORDER BY \" | &nySort",
+      "note": "binds used for the filter but ORDER BY taken straight from the request",
+      "file": "snippets/V15.pcode"
+    },
+    {
+      "id": "V16",
+      "vulnerable": true,
+      "category": "missing_authorization",
+      "flaw": "If &nyOprid = \"PSADMIN\"",
+      "note": "authorization decided by a client-supplied operator id",
+      "file": "snippets/V16.pcode"
+    },
+    {
+      "id": "C01",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "request parameter passed as a bind variable",
+      "file": "snippets/C01.pcode"
+    },
+    {
+      "id": "C02",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "bank lookup gated by role and row-level ownership check",
+      "file": "snippets/C02.pcode"
+    },
+    {
+      "id": "C03",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "IB handler validates payee and amount before staging",
+      "file": "snippets/C03.pcode"
+    },
+    {
+      "id": "C04",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "AES profile; key managed by the crypt profile, not in code",
+      "file": "snippets/C04.pcode"
+    },
+    {
+      "id": "C05",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "card number masked before logging",
+      "file": "snippets/C05.pcode"
+    },
+    {
+      "id": "C06",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "report download restricted to an allow-list of names",
+      "file": "snippets/C06.pcode"
+    },
+    {
+      "id": "C07",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "meta-SQL with binds only",
+      "file": "snippets/C07.pcode"
+    },
+    {
+      "id": "C08",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "approval gated by role and segregation-of-duties check",
+      "file": "snippets/C08.pcode"
+    },
+    {
+      "id": "C09",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "string concatenation in SQL, but only of a code constant (false-positive bait)",
+      "file": "snippets/C09.pcode"
+    },
+    {
+      "id": "C10",
+      "vulnerable": false,
+      "category": null,
+      "flaw": null,
+      "note": "ORDER BY chosen from a fixed mapping, never from raw input",
+      "file": "snippets/C10.pcode"
+    }
+  ]
+}

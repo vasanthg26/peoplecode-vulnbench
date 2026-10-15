@@ -1,0 +1,8 @@
+Local object &nyCry;
+Local string &nyKey, &nyOut;
+&nyKey = "3F9A61C0D2B47E85A1C3F09B6D2E7A44";
+&nyCry = CreateObject("Crypt");
+&nyCry.Open("NY_AES256_CBC");
+&nyCry.UpdateData(NY_CARD_WRK.CARD_NBR.Value);
+&nyOut = &nyCry.Result;
+NY_CARD_TBL.CARD_TOKEN.Value = &nyOut | ":" | &nyKey;

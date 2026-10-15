@@ -1,0 +1,8 @@
+Local string &nySearch, &nyVoucher;
+Local SQL &nySql;
+&nySearch = NY_SRCH_WRK.DESCR.Value;
+&nySql = CreateSQL("SELECT VOUCHER_ID FROM PS_VOUCHER WHERE DESCR254_MIXED LIKE '%" | &nySearch | "%'");
+While &nySql.Fetch(&nyVoucher)
+   WinMessage("Found: " | &nyVoucher, 0);
+End-While;
+&nySql.Close();

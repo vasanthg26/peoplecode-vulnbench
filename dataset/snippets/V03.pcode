@@ -1,0 +1,9 @@
+method OnRequest
+   /+ &_MSG as Message +/
+   /+ Returns Message +/
+   Local XmlDoc &nyDoc = &_MSG.GetXmlDoc();
+   Local string &nyBu = &nyDoc.DocumentElement.FindNode("BUSINESS_UNIT").NodeValue;
+   Local Rowset &nyRs = CreateRowset(Record.PO_HDR);
+   &nyRs.Fill("WHERE BUSINESS_UNIT = '" | &nyBu | "'");
+   Return %IntBroker.CreateMessage(Operation.NY_PO_LIST_RESP);
+end-method;

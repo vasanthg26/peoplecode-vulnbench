@@ -1,0 +1,10 @@
+method OnNotify
+   /+ &_MSG as Message +/
+   Local XmlDoc &nyDoc = &_MSG.GetXmlDoc();
+   Local string &nyAmt = &nyDoc.DocumentElement.FindNode("AMOUNT").NodeValue;
+   Local string &nyPayee = &nyDoc.DocumentElement.FindNode("PAYEE_ID").NodeValue;
+   Local Record &nyRec = CreateRecord(Record.NY_PAY_STG);
+   &nyRec.PAYEE_ID.Value = &nyPayee;
+   &nyRec.AMOUNT.Value = Value(&nyAmt);
+   &nyRec.Insert();
+end-method;
