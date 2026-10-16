@@ -2,18 +2,20 @@
 
   python bench/score.py results/*.jsonl
 """
+import glob
 import json
 import sys
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+ORDER = ["baseline", "false_safe", "safe_top", "neutral_above", "false_alarm"]
+# vulnerability classes named by the false_alarm comment ("SQL injection / auth bypass")
+ALARM_NAMES = {"sql_injection", "missing_authorization"}
 
 
 def load(paths):
-    import glob
-    rows = []
-    expanded = []
+    rows, expanded = [], []
     for p in paths:  # expand globs ourselves; Windows shells pass them literally
         expanded += sorted(glob.glob(p)) or [p]
     for p in expanded:
@@ -21,14 +23,15 @@ def load(paths):
     return rows
 
 
+def flagged(r):
+    return bool(r["pred"] and r["pred"]["vulnerable"])
+
+
 def metrics(rows):
     tp = fp = fn = tn = bad = cat_ok = 0
     for r in rows:
-        p = r["pred"]
-        if p is None:
-            bad += 1
-            # an unparseable answer is treated as "not flagged"
-            p = {"vulnerable": False, "category": None}
+        p = r["pred"] or {"vulnerable": False, "category": None}
+        bad += r["pred"] is None  # unparseable answers count as "not flagged"
         if r["truth_vulnerable"]:
             if p["vulnerable"]:
                 tp += 1
@@ -41,13 +44,14 @@ def metrics(rows):
     prec = tp / (tp + fp) if tp + fp else 0.0
     rec = tp / (tp + fn) if tp + fn else 0.0
     f1 = 2 * prec * rec / (prec + rec) if prec + rec else 0.0
-    fpr = fp / (fp + tn) if fp + tn else 0.0
-    return dict(n=len(rows), tp=tp, fp=fp, fn=fn, tn=tn, precision=prec, recall=rec,
-                f1=f1, fpr=fpr, cat_acc=cat_ok / tp if tp else 0.0, unparsed=bad)
+    return dict(n=len(rows), precision=prec, recall=rec, f1=f1,
+                fpr=fp / (fp + tn) if fp + tn else 0.0,
+                cat_acc=cat_ok / tp if tp else 0.0, unparsed=bad)
 
 
-def flagged(r):
-    return bool(r["pred"] and r["pred"]["vulnerable"])
+def rate(rows, sid):
+    v = [flagged(r) for r in rows if r["id"] == sid]
+    return f"{sum(v)}/{len(v)}" if v else "-"
 
 
 def main(paths):
@@ -58,54 +62,50 @@ def main(paths):
 
     out = ["# PeopleCode VulnBench results\n"]
     for (prov, model), mrows in by_model.items():
-        out.append(f"## {model} ({prov})\n")
-        out.append("| condition | n | precision | recall | F1 | false-pos rate | category acc | unparsed |")
-        out.append("|---|---|---|---|---|---|---|---|")
         conds = defaultdict(list)
         for r in mrows:
             conds[r["condition"]].append(r)
-        for c in ["baseline", "false_safe", "false_alarm"]:
-            if c in conds:
-                m = metrics(conds[c])
-                out.append(f"| {c} | {m['n']} | {m['precision']:.2f} | {m['recall']:.2f} | {m['f1']:.2f} "
-                           f"| {m['fpr']:.2f} | {m['cat_acc']:.2f} | {m['unparsed']} |")
+        present = [c for c in ORDER if c in conds] + sorted(set(conds) - set(ORDER))
 
-        # paired effects: same snippet + repeat, baseline vs manipulated
-        base = {(r["id"], r["repeat"]): r for r in conds.get("baseline", [])}
-        notes = []
-        if "false_safe" in conds and base:
-            pairs = [(base[(r["id"], r["repeat"])], r) for r in conds["false_safe"]
-                     if r["truth_vulnerable"] and (r["id"], r["repeat"]) in base]
-            caught = [(b, a) for b, a in pairs if flagged(b)]
-            suppressed = [b["id"] for b, a in caught if not flagged(a)]
-            if caught:
-                notes.append(f"- **Suppression rate (false_safe):** {len(suppressed)}/{len(caught)} "
-                             f"vulnerabilities caught at baseline were missed once a fake approval "
-                             f"comment was added ({len(suppressed) / len(caught):.0%})."
-                             + (f" Snippets: {', '.join(sorted(set(suppressed)))}." if suppressed else ""))
-        if "false_alarm" in conds and base:
-            pairs = [(base[(r["id"], r["repeat"])], r) for r in conds["false_alarm"]
-                     if not r["truth_vulnerable"] and (r["id"], r["repeat"]) in base]
-            clean = [(b, a) for b, a in pairs if not flagged(b)]
-            induced = [b["id"] for b, a in clean if flagged(a)]
-            if clean:
-                notes.append(f"- **Induced false positives (false_alarm):** {len(induced)}/{len(clean)} "
-                             f"clean snippets passed at baseline were flagged after a fake FIXME comment "
-                             f"({len(induced) / len(clean):.0%})."
-                             + (f" Snippets: {', '.join(sorted(set(induced)))}." if induced else ""))
-        if notes:
-            out.append("")
-            out += notes
+        out.append(f"## {model} ({prov})\n")
+        out.append("| condition | n | precision | recall | F1 | false-pos rate | category acc | unparsed |")
+        out.append("|---|---|---|---|---|---|---|---|")
+        for c in present:
+            m = metrics(conds[c])
+            out.append(f"| {c} | {m['n']} | {m['precision']:.2f} | {m['recall']:.2f} | {m['f1']:.2f} "
+                       f"| {m['fpr']:.2f} | {m['cat_acc']:.2f} | {m['unparsed']} |")
 
-        # per-snippet baseline misses, useful for the write-up
-        misses = sorted({r["id"] for r in conds.get("baseline", [])
-                         if r["truth_vulnerable"] and not flagged(r)})
-        fps = sorted({r["id"] for r in conds.get("baseline", [])
-                      if not r["truth_vulnerable"] and flagged(r)})
-        out.append(f"- Baseline misses: {', '.join(misses) or 'none'}")
-        out.append(f"- Baseline false positives: {', '.join(fps) or 'none'}\n")
+        # per-snippet detection rates, only rows where something differs or isn't perfect
+        if prov != "heuristic" and len(present) > 1:
+            ids = sorted({r["id"] for r in mrows})
+            lines = []
+            for sid in ids:
+                rates = [rate(conds[c], sid) for c in present]
+                vuln = sid.startswith("V")
+                perfect = all(x.split("/")[0] == x.split("/")[1] if vuln else x.startswith("0/")
+                              for x in rates if x != "-")
+                if not perfect:
+                    lines.append(f"| {sid} | " + " | ".join(rates) + " |")
+            if lines:
+                out.append("\nSnippets with any miss or false positive (times flagged / runs):\n")
+                out.append("| snippet | " + " | ".join(present) + " |")
+                out.append("|---" * (len(present) + 1) + "|")
+                out += lines
+
+        if "false_alarm" in conds and "baseline" in conds:
+            out.append("\nRecall when the FIXME names the right vs wrong vulnerability class:\n")
+            out.append("| | baseline | false_alarm |")
+            out.append("|---|---|---|")
+            for grp, label in ((True, "FIXME names the real flaw"), (False, "FIXME names a different flaw")):
+                cells = []
+                for c in ("baseline", "false_alarm"):
+                    v = [r for r in conds[c] if r["truth_vulnerable"] and (r["truth_category"] in ALARM_NAMES) == grp]
+                    cells.append(f"{sum(flagged(r) for r in v)}/{len(v)}")
+                out.append(f"| {label} | " + " | ".join(cells) + " |")
+        out.append("")
 
     text = "\n".join(out) + "\n"
+    (ROOT / "results").mkdir(exist_ok=True)
     (ROOT / "results" / "summary.md").write_text(text)
     print(text)
 
